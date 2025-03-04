@@ -1,5 +1,7 @@
 package lexer
 
+import "fmt"
+
 // Lexer represents a lexical analyzer.
 type Lexer struct {
 	code         string          // Source code
@@ -51,4 +53,9 @@ func (l *Lexer) peekNext() byte {
 		return 0
 	}
 	return l.code[l.pos+1]
+}
+
+// error represents critical message
+func (l *Lexer) error(message string) {
+	fmt.Printf("Error on line %d, column %d: %s\n", l.line, l.column, message)
 }
