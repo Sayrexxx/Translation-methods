@@ -36,3 +36,19 @@ func (l *Lexer) addToken(tokenType string, value string) {
 	})
 	l.column += len(value)
 }
+
+// peek returns current character
+func (l *Lexer) peek() byte {
+	if l.pos >= len(l.code) {
+		return 0
+	}
+	return l.code[l.pos]
+}
+
+// peekNext return next character
+func (l *Lexer) peekNext() byte {
+	if l.pos+1 >= len(l.code) {
+		return 0
+	}
+	return l.code[l.pos+1]
+}
