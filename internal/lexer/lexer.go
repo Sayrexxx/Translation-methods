@@ -78,3 +78,106 @@ func (l *Lexer) readIdentifier() {
 		l.addToken("identifier", value)
 	}
 }
+
+// readNumber reads a numeric literal.
+func (l *Lexer) readNumber() {
+	startPos := l.pos
+	for l.pos < len(l.code) && utils.IsDigit(l.peek()) {
+		l.pos++
+	}
+	if l.peek() == '.' {
+		l.pos++
+		for l.pos < len(l.code) && utils.IsDigit(l.peek()) {
+			l.pos++
+		}
+	}
+	value := l.code[startPos:l.pos]
+	l.addToken("number", value)
+}
+
+// readChar reads a character literal
+func (l *Lexer) readChar() {
+	l.pos++ // Skip opening quote
+	startPos := l.pos
+	for l.pos < len(l.code) && l.peek() != '\'' {
+		if l.peek() == '\\' {
+			l.pos++ // Skip escape character
+		}
+		l.pos++
+	}
+	if l.peek() != '\'' {
+		l.error("Unclosed character literal")
+		return
+	}
+	value := l.code[startPos:l.pos]
+	l.addToken("char", value)
+	l.pos++ // Skip closing quote
+}
+
+// readString reads a string literal.
+func (l *Lexer) readString() {
+	l.pos++ // Skip opening quote
+	startPos := l.pos
+	for l.pos < len(l.code) && l.peek() != '"' {
+		if l.peek() == '\\' {
+			l.pos++ // Skip escape character
+		}
+		l.pos++
+	}
+	if l.peek() != '"' {
+		l.error("Unclosed string literal")
+		return
+	}
+	value := l.code[startPos:l.pos]
+	l.addToken("string", value)
+	l.pos++ // Skip closing quote
+}
+
+// readLambda reads lambda expression
+func (l *Lexer) readLambda() {
+	l.pos++ // Skip '\'
+	startPos := l.pos
+	for l.pos < len(l.code) && l.peek() != '>' {
+		l.pos++
+	}
+	if l.peek() != '>' {
+		l.error("Unclosed lambda expression")
+		return
+	}
+	value := l.code[startPos:l.pos]
+	l.addToken("lambda", value)
+	l.pos++ // Skip '>'
+}
+
+// readOperator reads operator
+func (l *Lexer) readOperator() {
+	startPos := l.pos
+	for l.pos < len(l.code) && utils.IsOperator(l.peek()) {
+		l.pos++
+	}
+	value := l.code[startPos:l.pos]
+	l.addToken("operator", value)
+}
+
+// readPunctuation reads punctuation construct
+func (l *Lexer) readPunctuation() {
+	value := string(l.peek())
+	l.addToken("punctuation", value)
+	l.pos++
+}
+
+// readPragma reads GHC extension
+func (l *Lexer) readPragma() {
+	l.pos += 2 // Skip '{#'
+	startPos := l.pos
+	for l.pos < len(l.code) && !(l.peek() == '#' && l.peekNext() == '}') {
+		l.pos++
+	}
+	if l.peek() != '#' || l.peekNext() != '}' {
+		l.error("Unclosed GHC extension")
+		return
+	}
+	value := l.code[startPos:l.pos]
+	l.addToken("pragma", value)
+	l.pos += 2 // Skip '#}'
+}
