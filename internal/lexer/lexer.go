@@ -1,6 +1,9 @@
 package lexer
 
-import "fmt"
+import (
+	"fmt"
+	"translation_methods/internal/utils"
+)
 
 // Lexer represents a lexical analyzer.
 type Lexer struct {
@@ -58,4 +61,20 @@ func (l *Lexer) peekNext() byte {
 // error represents critical message
 func (l *Lexer) error(message string) {
 	fmt.Printf("Error on line %d, column %d: %s\n", l.line, l.column, message)
+}
+
+// readIdentifier reads an identifier or keyword.
+func (l *Lexer) readIdentifier() {
+	startPos := l.pos
+	for l.pos < len(l.code) && (utils.IsLetter(l.peek()) || utils.IsDigit(l.peek()) || l.peek() == '\'') {
+		l.pos++
+	}
+	value := l.code[startPos:l.pos]
+
+	// Check if the identifier is a keyword
+	if _, ok := l.keywords[value]; ok {
+		l.addToken("keyword", value)
+	} else {
+		l.addToken("identifier", value)
+	}
 }
