@@ -25,3 +25,14 @@ func NewLexer(code string) *Lexer {
 		punctuations: map[string]bool{},
 	}
 }
+
+// addToken adds a token to the list.
+func (l *Lexer) addToken(tokenType string, value string) {
+	l.Tokens = append(l.Tokens, Token{
+		Type:   tokenType,
+		Value:  value,
+		Line:   l.line,
+		Column: l.column,
+	})
+	l.column += len(value)
+}
